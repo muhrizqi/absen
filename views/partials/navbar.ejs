@@ -1,0 +1,18 @@
+<nav class="bottom-navbar glass-effect">
+    <a href="/" class="nav-item <%= currentPath === '/' ? 'active' : '' %>">
+        <span class="material-icons-round">dashboard</span>
+        <span class="nav-label">Beranda</span>
+    </a>
+    <a href="/sessions" class="nav-item <%= currentPath.startsWith('/sessions') ? 'active' : '' %>">
+        <span class="material-icons-round">fact_check</span>
+        <span class="nav-label">Absensi</span>
+    </a>
+    <a href="/participants" class="nav-item <%= currentPath.startsWith('/participants') ? 'active' : '' %>">
+        <span class="material-icons-round">people</span>
+        <span class="nav-label">Peserta</span>
+    </a>
+    <a href="/settings" class="nav-item <%= currentPath.startsWith('/settings') ? 'active' : '' %>">
+        <span class="material-icons-round">settings</span>
+        <span class="nav-label">Pengaturan</span>
+    </a>
+</nav>

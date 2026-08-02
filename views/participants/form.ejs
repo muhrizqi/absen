@@ -1,0 +1,74 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/participants" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title"><%= title %></h2>
+    </div>
+</div>
+
+<div class="form-container glass-card fade-in">
+    <form action="<%= p ? '/participants/' + p.id : '/participants' %>" method="POST">
+        
+        <h3 class="section-title">Data Diri Anak</h3>
+        <div class="form-group">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" name="full_name" class="form-control" value="<%= p ? p.full_name : '' %>" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Nama Panggilan</label>
+            <input type="text" name="nickname" class="form-control" value="<%= p ? p.nickname : '' %>">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Alamat</label>
+            <textarea name="address" class="form-control" rows="2"><%= p ? p.address : '' %></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">RT</label>
+                <input type="text" name="rt" class="form-control" value="<%= p ? p.rt : '' %>" placeholder="Misal: 01">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">RW</label>
+                <input type="text" name="rw" class="form-control" value="<%= p ? p.rw : '' %>" placeholder="Misal: 10">
+            </div>
+        </div>
+
+        <h3 class="section-title" style="margin-top: 1.5rem;">Data Orang Tua / Wali</h3>
+        <div class="form-group">
+            <label class="form-label">Nama Wali</label>
+            <input type="text" name="guardian_name" class="form-control" value="<%= p ? p.guardian_name : '' %>">
+        </div>
+        <div class="form-group">
+            <label class="form-label">No. WhatsApp Wali (Untuk Notifikasi)</label>
+            <input type="tel" name="guardian_whatsapp" class="form-control" value="<%= p ? p.guardian_whatsapp : '' %>" placeholder="Misal: 081234567890">
+            <small style="color: rgba(255,255,255,0.6); margin-top: 5px; display: block;">Pastikan nomor aktif untuk menerima notifikasi otomatis.</small>
+        </div>
+
+        <h3 class="section-title" style="margin-top: 1.5rem;">Kelompok Kegiatan</h3>
+        <div class="form-group">
+            <label class="form-label">Pilih kelompok yang diikuti anak (Bisa lebih dari 1)</label>
+            <% if (groups && groups.length > 0) { %>
+                <div class="checkbox-group" style="max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px;">
+                    <% groups.forEach(g => { %>
+                        <label class="checkbox-label" style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <input type="checkbox" name="group_ids" value="<%= g.id %>" 
+                                <%= (group_ids && group_ids.includes(g.id)) ? 'checked' : '' %>>
+                            <span>
+                                <strong><%= g.name %></strong>
+                                <br>
+                                <small style="color: var(--primary-color);"><%= g.activity_name %></small>
+                            </span>
+                        </label>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p style="color: #F59E0B; font-size: 0.9rem;">Belum ada kelompok yang tersedia. Silakan buat kelompok terlebih dahulu.</p>
+            <% } %>
+        </div>
+
+        <div class="form-actions" style="margin-top: 2rem;">
+            <a href="/participants" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary ripple">Simpan Data</button>
+        </div>
+    </form>
+</div>

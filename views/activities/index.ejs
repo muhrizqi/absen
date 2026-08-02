@@ -1,0 +1,42 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Kelola Kegiatan</h2>
+    </div>
+    <a href="/activities/create" class="btn btn-primary ripple"><span class="material-icons-round">add</span> Tambah</a>
+</div>
+
+<div class="card-list fade-in">
+    <% if (activities && activities.length > 0) { %>
+        <% activities.forEach(a => { %>
+            <div class="list-card glass-card">
+                <div class="card-content">
+                    <div class="card-title">
+                        <h3><%= a.name %></h3>
+                        <% if(a.active) { %>
+                            <span class="status open">Aktif</span>
+                        <% } else { %>
+                            <span class="status closed">Nonaktif</span>
+                        <% } %>
+                    </div>
+                    <div class="card-meta">
+                        <% if(a.schedule_info) { %>
+                            <span><i class="material-icons-round">schedule</i> <%= a.schedule_info %></span>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="/activities/<%= a.id %>/edit" class="icon-btn edit-btn"><span class="material-icons-round">edit</span></a>
+                    <form action="/activities/<%= a.id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('Yakin ingin menghapus kegiatan ini?');">
+                        <button type="submit" class="icon-btn delete-btn"><span class="material-icons-round">delete</span></button>
+                    </form>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">local_activity</span>
+            <p>Belum ada kegiatan.</p>
+        </div>
+    <% } %>
+</div>

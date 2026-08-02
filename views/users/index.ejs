@@ -1,0 +1,41 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Kelola User</h2>
+    </div>
+    <a href="/users/create" class="btn btn-primary ripple"><span class="material-icons-round">add</span> Tambah</a>
+</div>
+
+<div class="card-list fade-in">
+    <% if (users && users.length > 0) { %>
+        <% users.forEach(u => { %>
+            <div class="list-card glass-card">
+                <div class="card-content">
+                    <div class="card-title">
+                        <h3><%= u.full_name %></h3>
+                        <span class="user-badge role-<%= u.role %>"><%= u.role %></span>
+                    </div>
+                    <div class="card-meta">
+                        <span><i class="material-icons-round">person</i> <%= u.username %></span>
+                        <% if(u.phone) { %>
+                            <span><i class="material-icons-round">phone</i> <%= u.phone %></span>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="/users/<%= u.id %>/edit" class="icon-btn edit-btn"><span class="material-icons-round">edit</span></a>
+                    <% if(user.id !== u.id) { %>
+                        <form action="/users/<%= u.id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
+                            <button type="submit" class="icon-btn delete-btn"><span class="material-icons-round">delete</span></button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">people_outline</span>
+            <p>Belum ada user.</p>
+        </div>
+    <% } %>
+</div>

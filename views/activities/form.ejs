@@ -1,0 +1,36 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/activities" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title"><%= title %></h2>
+    </div>
+</div>
+
+<div class="form-container glass-card fade-in">
+    <form action="<%= activity ? '/activities/' + activity.id : '/activities' %>" method="POST">
+        <div class="form-group">
+            <label class="form-label">Nama Kegiatan</label>
+            <input type="text" name="name" class="form-control" value="<%= activity ? activity.name : '' %>" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Deskripsi</label>
+            <textarea name="description" class="form-control" rows="3"><%= activity ? activity.description : '' %></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Info Jadwal</label>
+            <input type="text" name="schedule_info" class="form-control" value="<%= activity ? activity.schedule_info : '' %>" placeholder="Misal: Setiap Ahad pagi">
+        </div>
+        <% if (activity) { %>
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+            <label class="form-label" style="margin-bottom: 0;">Status Aktif</label>
+            <label class="switch">
+                <input type="checkbox" name="active" <%= activity.active ? 'checked' : '' %>>
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <% } %>
+        <div class="form-actions">
+            <a href="/activities" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary ripple">Simpan</button>
+        </div>
+    </form>
+</div>

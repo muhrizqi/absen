@@ -1,0 +1,153 @@
+<div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+    <div class="header-titles" style="width: 100%;">
+        <a href="/sessions" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <div style="flex-grow: 1;">
+            <h2 class="page-title"><%= session.group_name %></h2>
+            <span class="activity-badge"><%= session.activity_name %></span>
+        </div>
+        <% if (session.status === 'open') { %>
+            <form action="/sessions/<%= session.id %>/close" method="POST" onsubmit="return confirm('Yakin ingin menyelesaikan kegiatan? Ini akan mengirim pesan WA ke semua wali murid yang anaknya hadir.');">
+                <button type="submit" class="btn btn-primary ripple" style="background: var(--warning-color); color: white;">
+                    <span class="material-icons-round">done_all</span> Selesai
+                </button>
+            </form>
+        <% } %>
+    </div>
+    <div style="display: flex; justify-content: space-between; width: 100%; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
+        <span><i class="material-icons-round" style="font-size: 14px; vertical-align: middle;">calendar_today</i> <%= new Date(session.session_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+        <span>Hadir: <strong id="hadirCount"><%= attendances.filter(a => a.present).length %></strong>/<%= attendances.length %></span>
+    </div>
+</div>
+
+<% if (session.status === 'closed') { %>
+    <div class="alert alert-info glass-effect" style="margin-bottom: 1.5rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #60A5FA;">
+        <span class="material-icons-round">info</span>
+        Sesi ini sudah selesai dan ditutup. Notifikasi WA telah dikirim.
+    </div>
+<% } %>
+
+<!-- Simple search for attendance -->
+<div class="search-bar fade-in" style="margin-bottom: 1rem;">
+    <div class="form-group" style="margin-bottom: 0; position: relative;">
+        <span class="material-icons-round" style="position: absolute; left: 12px; top: 12px; color: rgba(255,255,255,0.5);">search</span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Cari nama peserta..." style="padding-left: 40px;">
+    </div>
+</div>
+
+<div class="attendance-list fade-in">
+    <% if (attendances && attendances.length > 0) { %>
+        <% attendances.forEach(a => { %>
+            <div class="attendance-card glass-card participant-item" data-name="<%= a.full_name.toLowerCase() %> <%= (a.nickname || '').toLowerCase() %>">
+                <div class="participant-info">
+                    <div class="avatar-placeholder" style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold;">
+                        <%= a.full_name.charAt(0).toUpperCase() %>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; color: var(--text-color);"><%= a.full_name %></h4>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                            <% if (a.nickname) { %>
+                                <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5);"><%= a.nickname %></span>
+                            <% } %>
+                            
+                            <!-- WA Status Indicator -->
+                            <span class="wa-status" id="wa-status-<%= a.participant_id %>" style="display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: <%= a.wa_sent ? '#10B981' : 'rgba(255,255,255,0.3)' %>;">
+                                <i class="material-icons-round" style="font-size: 12px;">done_all</i>
+                                <%= a.wa_sent ? 'WA Terkirim' : 'WA Belum' %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="attendance-action">
+                    <label class="switch">
+                        <input type="checkbox" class="attendance-toggle" 
+                               data-participant-id="<%= a.participant_id %>"
+                               <%= a.present ? 'checked' : '' %>
+                               <%= session.status === 'closed' ? 'disabled' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">people_outline</span>
+            <p>Belum ada peserta di kelompok ini.</p>
+        </div>
+    <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionId = '<%= session.id %>';
+    const toggles = document.querySelectorAll('.attendance-toggle');
+    const hadirCountEl = document.getElementById('hadirCount');
+    const searchInput = document.getElementById('searchInput');
+    const items = document.querySelectorAll('.participant-item');
+
+    // Search functionality
+    searchInput.addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        items.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name.includes(term)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', async function() {
+            const participantId = this.getAttribute('data-participant-id');
+            const present = this.checked;
+            
+            const actionMsg = present ? 'menandai hadir (pesan WA akan dikirim otomatis)' : 'membatalkan kehadiran';
+            if (!confirm(`Yakin ingin ${actionMsg} untuk peserta ini?`)) {
+                this.checked = !present; // revert UI
+                return;
+            }
+
+            // UI optimistic update for count
+            let currentCount = parseInt(hadirCountEl.textContent);
+            hadirCountEl.textContent = present ? currentCount + 1 : currentCount - 1;
+
+            try {
+                const res = await fetch(`/sessions/${sessionId}/mark`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ participant_id: participantId, present })
+                });
+
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update WA status UI
+                    const waStatusEl = document.getElementById(`wa-status-${participantId}`);
+                    if (data.wa_sent) {
+                        waStatusEl.style.color = '#10B981';
+                        waStatusEl.innerHTML = '<i class="material-icons-round" style="font-size: 12px;">done_all</i> WA Terkirim';
+                    } else if (present) {
+                        waStatusEl.style.color = 'rgba(255,255,255,0.3)';
+                        waStatusEl.innerHTML = '<i class="material-icons-round" style="font-size: 12px;">done_all</i> WA Belum';
+                    }
+                } else {
+                    // Revert UI on error
+                    this.checked = !present;
+                    hadirCountEl.textContent = present ? currentCount - 1 : currentCount + 1;
+                    alert(data.error || 'Gagal menyimpan absensi');
+                }
+            } catch (err) {
+                console.error(err);
+                // Revert UI on error
+                this.checked = !present;
+                hadirCountEl.textContent = present ? currentCount - 1 : currentCount + 1;
+                alert('Terjadi kesalahan jaringan');
+            }
+        });
+    });
+});
+</script>

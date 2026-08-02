@@ -1,0 +1,35 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Laporan Absensi</h2>
+    </div>
+</div>
+
+<div class="form-container glass-card fade-in">
+    <form action="/reports/activity" method="GET">
+        <div class="form-group">
+            <label class="form-label">Pilih Kegiatan</label>
+            <select name="activity_id" class="form-control" required>
+                <option value="">-- Pilih Kegiatan --</option>
+                <% activities.forEach(a => { %>
+                    <option value="<%= a.id %>"><%= a.name %></option>
+                <% }) %>
+            </select>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label">Dari Tanggal (Opsional)</label>
+                <input type="date" name="start_date" class="form-control">
+            </div>
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label">Sampai Tanggal (Opsional)</label>
+                <input type="date" name="end_date" class="form-control">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary ripple" style="width: 100%;">
+            <span class="material-icons-round">analytics</span> Tampilkan Laporan
+        </button>
+    </form>
+</div>

@@ -1,0 +1,68 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Data Peserta</h2>
+    </div>
+    <a href="/participants/create" class="btn btn-primary ripple"><span class="material-icons-round">person_add</span> Tambah</a>
+</div>
+
+<!-- Simple search bar -->
+<div class="search-bar fade-in" style="margin-bottom: 1rem;">
+    <div class="form-group" style="margin-bottom: 0; position: relative;">
+        <span class="material-icons-round" style="position: absolute; left: 12px; top: 12px; color: rgba(255,255,255,0.5);">search</span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Cari nama peserta..." style="padding-left: 40px;">
+    </div>
+</div>
+
+<div class="card-list fade-in" id="participantList">
+    <% if (participants && participants.length > 0) { %>
+        <% participants.forEach(p => { %>
+            <div class="list-card glass-card participant-card" data-name="<%= p.full_name.toLowerCase() %> <%= (p.nickname || '').toLowerCase() %>">
+                <a href="/participants/<%= p.id %>" class="card-content" style="text-decoration: none; color: inherit; flex-grow: 1;">
+                    <div class="card-title">
+                        <h3><%= p.full_name %></h3>
+                        <% if(p.nickname) { %>
+                            <span class="nickname-badge">Panggilan: <%= p.nickname %></span>
+                        <% } %>
+                    </div>
+                    <div class="card-meta">
+                        <span><i class="material-icons-round">location_on</i> <%= p.address || '-' %> (RT <%= p.rt || '-' %>/RW <%= p.rw || '-' %>)</span>
+                        <span><i class="material-icons-round">family_restroom</i> <%= p.guardian_name || '-' %></span>
+                    </div>
+                </a>
+                <div class="card-actions">
+                    <a href="/participants/<%= p.id %>/edit" class="icon-btn edit-btn"><span class="material-icons-round">edit</span></a>
+                    <% if (user.role === 'superadmin' || user.role === 'coordinator') { %>
+                        <form action="/participants/<%= p.id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('Yakin ingin menghapus peserta ini? Semua data absensinya akan hilang.');">
+                            <button type="submit" class="icon-btn delete-btn"><span class="material-icons-round">delete</span></button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">people</span>
+            <p>Belum ada data peserta.</p>
+        </div>
+    <% } %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.participant-card');
+
+    searchInput.addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            if (name.includes(term)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+</script>

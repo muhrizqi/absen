@@ -1,0 +1,63 @@
+<div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+    <div class="header-titles" style="width: 100%;">
+        <a href="/reports" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <div>
+            <h2 class="page-title"><%= activity.name %></h2>
+            <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                <% if(filters.start_date && filters.end_date) { %>
+                    <%= new Date(filters.start_date).toLocaleDateString('id-ID') %> - <%= new Date(filters.end_date).toLocaleDateString('id-ID') %>
+                <% } else { %>
+                    Semua Waktu
+                <% } %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card fade-in" style="overflow-x: auto; padding: 0;">
+    <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: rgba(0,0,0,0.2);">
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Kelompok</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Nama Peserta</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Total Sesi</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Hadir</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">%</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (reportData && reportData.length > 0) { %>
+                <% 
+                let currentGroup = '';
+                reportData.forEach(row => { 
+                    const isNewGroup = currentGroup !== row.group_name;
+                    currentGroup = row.group_name;
+                %>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); <%= isNewGroup ? 'border-top: 2px solid rgba(16, 185, 129, 0.3);' : '' %>">
+                        <td style="padding: 1rem;">
+                            <% if (isNewGroup) { %>
+                                <strong><%= row.group_name %></strong>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem;"><%= row.participant_name %></td>
+                        <td style="padding: 1rem; text-align: center;"><%= row.total_sessions || 0 %></td>
+                        <td style="padding: 1rem; text-align: center;"><%= row.present_count || 0 %></td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <% 
+                            let pct = row.attendance_percentage || 0; 
+                            let color = pct >= 75 ? '#10B981' : (pct >= 50 ? '#F59E0B' : '#EF4444');
+                            %>
+                            <span style="color: <%= color %>; font-weight: bold;"><%= pct %>%</span>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
+                        Belum ada data absensi untuk filter ini.
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>

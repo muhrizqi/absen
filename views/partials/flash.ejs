@@ -1,0 +1,19 @@
+<% if (success && success.length > 0) { %>
+    <div class="alert alert-success glass-effect slide-in">
+        <span class="material-icons-round">check_circle</span>
+        <span><%= success %></span>
+        <button type="button" class="close-btn" onclick="this.parentElement.remove()">
+            <span class="material-icons-round">close</span>
+        </button>
+    </div>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+    <div class="alert alert-error glass-effect slide-in">
+        <span class="material-icons-round">error</span>
+        <span><%= error %></span>
+        <button type="button" class="close-btn" onclick="this.parentElement.remove()">
+            <span class="material-icons-round">close</span>
+        </button>
+    </div>
+<% } %>

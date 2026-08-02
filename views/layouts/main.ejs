@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Absensi RMJ</title>
+    <meta name="description" content="Aplikasi Absensi Remaja Masjid Jogokariyan">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <% if (user) { %>
+            <%- include('../partials/header') %>
+        <% } %>
+
+        <main class="main-content <%= user ? 'has-navbar' : '' %>">
+            <%- include('../partials/flash') %>
+            
+            <%- body %>
+        </main>
+
+        <% if (user) { %>
+            <%- include('../partials/navbar') %>
+        <% } %>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        // Set dynamic current path for navbar highlighting
+        window.currentPath = '<%= typeof currentPath !== "undefined" ? currentPath : "/" %>';
+    </script>
+</body>
+</html>

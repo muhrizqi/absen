@@ -1,0 +1,17 @@
+<header class="app-header glass-effect">
+    <div class="header-content">
+        <div class="header-left">
+            <h1 class="header-title">RMJ Absensi</h1>
+        </div>
+        <div class="header-right">
+            <span class="user-badge role-<%= user.role %>">
+                <%= user.full_name.split(' ')[0] %>
+            </span>
+            <form action="/auth/logout" method="POST" style="display: inline;">
+                <button type="submit" class="icon-btn" title="Logout">
+                    <span class="material-icons-round">logout</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</header>

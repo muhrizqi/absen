@@ -1,0 +1,162 @@
+<div class="dashboard-header fade-in">
+    <h2 class="page-title">Ahlan wa Sahlan, <%= user.full_name %></h2>
+    <p class="subtitle"><%= new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+</div>
+
+<!-- Superadmin Dashboard -->
+<% if (user.role === 'superadmin') { %>
+    <div class="stats-grid fade-in" style="animation-delay: 0.1s;">
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon">people</span>
+            <div class="stat-info">
+                <h3>Total Peserta</h3>
+                <p class="stat-value"><%= stats.participants %></p>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon" style="color: #60A5FA;">assignment_ind</span>
+            <div class="stat-info">
+                <h3>Total User</h3>
+                <p class="stat-value"><%= stats.users %></p>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon" style="color: #F59E0B;">event</span>
+            <div class="stat-info">
+                <h3>Kegiatan Aktif</h3>
+                <p class="stat-value"><%= stats.activities %></p>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon" style="color: #10B981;">fact_check</span>
+            <div class="stat-info">
+                <h3>Sesi Hari Ini</h3>
+                <p class="stat-value"><%= stats.todaySessions %></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions fade-in" style="animation-delay: 0.2s;">
+        <h3 class="section-title">Aksi Cepat</h3>
+        <div class="actions-grid">
+            <a href="/users" class="action-btn glass-card ripple">
+                <span class="material-icons-round">manage_accounts</span>
+                Kelola User
+            </a>
+            <a href="/activities" class="action-btn glass-card ripple">
+                <span class="material-icons-round">local_activity</span>
+                Kelola Kegiatan
+            </a>
+            <a href="/groups" class="action-btn glass-card ripple">
+                <span class="material-icons-round">groups</span>
+                Kelola Kelompok
+            </a>
+            <a href="/reports" class="action-btn glass-card ripple">
+                <span class="material-icons-round">analytics</span>
+                Laporan
+            </a>
+        </div>
+    </div>
+
+<!-- Coordinator Dashboard -->
+<% } else if (user.role === 'coordinator') { %>
+    <div class="stats-grid fade-in" style="animation-delay: 0.1s;">
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon">event</span>
+            <div class="stat-info">
+                <h3>Kegiatan Diawasi</h3>
+                <p class="stat-value"><%= stats.activities ? stats.activities.length : 0 %></p>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon" style="color: #10B981;">people</span>
+            <div class="stat-info">
+                <h3>Total Peserta</h3>
+                <p class="stat-value"><%= stats.participantCount || 0 %></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="quick-actions fade-in" style="animation-delay: 0.2s;">
+        <h3 class="section-title">Aksi Cepat</h3>
+        <div class="actions-grid">
+            <a href="/groups" class="action-btn glass-card ripple">
+                <span class="material-icons-round">groups</span>
+                Lihat Kelompok
+            </a>
+            <a href="/reports" class="action-btn glass-card ripple">
+                <span class="material-icons-round">analytics</span>
+                Lihat Laporan
+            </a>
+        </div>
+    </div>
+
+<!-- Facilitator Dashboard -->
+<% } else { %>
+    <div class="stats-grid fade-in" style="animation-delay: 0.1s;">
+        <div class="stat-card glass-card">
+            <span class="material-icons-round stat-icon">groups</span>
+            <div class="stat-info">
+                <h3>Kelompok Saya</h3>
+                <p class="stat-value"><%= stats.groups ? stats.groups.length : 0 %></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions fade-in" style="animation-delay: 0.2s;">
+        <h3 class="section-title">Aksi Cepat</h3>
+        <div class="actions-grid">
+            <a href="/sessions/create" class="action-btn glass-card primary-action ripple">
+                <span class="material-icons-round">add_circle</span>
+                Buka Sesi Baru
+            </a>
+            <a href="/participants/create" class="action-btn glass-card ripple">
+                <span class="material-icons-round">person_add</span>
+                Tambah Peserta
+            </a>
+        </div>
+    </div>
+<% } %>
+
+<!-- Recent Sessions (All Roles) -->
+<div class="recent-sessions fade-in" style="animation-delay: 0.3s; margin-top: 2rem;">
+    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 class="section-title" style="margin: 0;">Sesi Terakhir</h3>
+        <a href="/sessions" class="text-link">Lihat Semua</a>
+    </div>
+    
+    <div class="session-list">
+        <% if (stats.recentSessions && stats.recentSessions.length > 0) { %>
+            <% stats.recentSessions.forEach(session => { %>
+                <a href="/sessions/<%= session.id %>/attendance" class="session-card glass-card ripple">
+                    <div class="session-info">
+                        <div class="session-title">
+                            <span class="activity-badge"><%= session.activity_name %></span>
+                            <h4><%= session.group_name %></h4>
+                        </div>
+                        <div class="session-meta">
+                            <span class="date"><i class="material-icons-round" style="font-size: 14px;">calendar_today</i> <%= new Date(session.session_date).toLocaleDateString('id-ID') %></span>
+                            <% if(session.status === 'open') { %>
+                                <span class="status open"><i class="material-icons-round" style="font-size: 14px;">play_circle</i> Berjalan</span>
+                            <% } else { %>
+                                <span class="status closed"><i class="material-icons-round" style="font-size: 14px;">check_circle</i> Selesai</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="session-stats">
+                        <div class="attendance-count">
+                            <span class="number"><%= session.hadir || 0 %></span>
+                            <span class="label">Hadir</span>
+                        </div>
+                        <i class="material-icons-round chevron">chevron_right</i>
+                    </div>
+                </a>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state glass-card">
+                <span class="material-icons-round">inbox</span>
+                <p>Belum ada sesi tercatat</p>
+            </div>
+        <% } %>
+    </div>
+</div>

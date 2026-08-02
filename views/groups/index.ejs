@@ -1,0 +1,41 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Kelola Kelompok</h2>
+    </div>
+    <% if (user.role === 'superadmin' || user.role === 'coordinator') { %>
+        <a href="/groups/create" class="btn btn-primary ripple"><span class="material-icons-round">add</span> Tambah</a>
+    <% } %>
+</div>
+
+<div class="card-list fade-in">
+    <% if (groups && groups.length > 0) { %>
+        <% groups.forEach(g => { %>
+            <div class="list-card glass-card">
+                <div class="card-content">
+                    <div class="card-title">
+                        <h3><%= g.name %></h3>
+                        <span class="activity-badge"><%= g.activity_name %></span>
+                    </div>
+                    <div class="card-meta">
+                        <span><i class="material-icons-round">person</i> <%= g.facilitator_name || 'Belum ada fasilitator' %></span>
+                        <span><i class="material-icons-round">groups</i> <%= g.member_count %> peserta</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <% if (user.role === 'superadmin' || user.role === 'coordinator') { %>
+                        <a href="/groups/<%= g.id %>/edit" class="icon-btn edit-btn"><span class="material-icons-round">edit</span></a>
+                        <form action="/groups/<%= g.id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('Yakin ingin menghapus kelompok ini?');">
+                            <button type="submit" class="icon-btn delete-btn"><span class="material-icons-round">delete</span></button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">groups</span>
+            <p>Belum ada kelompok.</p>
+        </div>
+    <% } %>
+</div>

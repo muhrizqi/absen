@@ -1,0 +1,46 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Riwayat Sesi Absensi</h2>
+    </div>
+    <% if (user.role !== 'coordinator') { %>
+        <a href="/sessions/create" class="btn btn-primary ripple"><span class="material-icons-round">add</span> Buka Sesi</a>
+    <% } %>
+</div>
+
+<div class="card-list fade-in">
+    <% if (sessions && sessions.length > 0) { %>
+        <% sessions.forEach(s => { %>
+            <div class="list-card glass-card">
+                <a href="/sessions/<%= s.id %>/attendance" class="card-content" style="text-decoration: none; color: inherit; flex-grow: 1;">
+                    <div class="card-title">
+                        <h3><%= s.group_name %></h3>
+                        <span class="activity-badge"><%= s.activity_name %></span>
+                    </div>
+                    <div class="card-meta">
+                        <span><i class="material-icons-round">calendar_today</i> <%= new Date(s.session_date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                        <span><i class="material-icons-round">check_circle</i> Hadir: <%= s.hadir %>/<%= s.total %></span>
+                        <% if(s.status === 'open') { %>
+                            <span style="color: var(--primary-color);"><i class="material-icons-round">play_circle</i> Sedang Berjalan</span>
+                        <% } else { %>
+                            <span style="color: rgba(255,255,255,0.5);"><i class="material-icons-round">stop_circle</i> Selesai</span>
+                        <% } %>
+                    </div>
+                </a>
+                <div class="card-actions">
+                    <a href="/sessions/<%= s.id %>/attendance" class="icon-btn edit-btn"><span class="material-icons-round">visibility</span></a>
+                    <% if (user.role === 'superadmin' || user.role === 'coordinator') { %>
+                        <form action="/sessions/<%= s.id %>/delete" method="POST" class="inline-form" onsubmit="return confirm('Yakin ingin menghapus sesi ini? Semua data absensi di sesi ini akan hilang.');">
+                            <button type="submit" class="icon-btn delete-btn"><span class="material-icons-round">delete</span></button>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">event_busy</span>
+            <p>Belum ada riwayat sesi.</p>
+        </div>
+    <% } %>
+</div>

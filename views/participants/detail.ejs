@@ -1,0 +1,67 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/participants" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Profil Peserta</h2>
+    </div>
+    <a href="/participants/<%= p.id %>/edit" class="btn btn-secondary ripple"><span class="material-icons-round">edit</span> Edit</a>
+</div>
+
+<div class="profile-card glass-card fade-in" style="margin-bottom: 2rem;">
+    <div class="profile-header" style="text-align: center; margin-bottom: 1.5rem;">
+        <div class="avatar-placeholder" style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.2); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1rem;">
+            <%= p.full_name.charAt(0).toUpperCase() %>
+        </div>
+        <h2 style="margin: 0; color: var(--text-color);"><%= p.full_name %></h2>
+        <% if(p.nickname) { %>
+            <p style="color: var(--primary-color); margin: 5px 0 0;">"<%= p.nickname %>"</p>
+        <% } %>
+    </div>
+
+    <div class="profile-details" style="display: grid; gap: 1rem;">
+        <div class="detail-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+            <span class="material-icons-round" style="color: rgba(255,255,255,0.5);">location_on</span>
+            <div>
+                <strong style="display: block; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Alamat</strong>
+                <span><%= p.address || '-' %> (RT <%= p.rt || '-' %>/RW <%= p.rw || '-' %>)</span>
+            </div>
+        </div>
+        <div class="detail-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+            <span class="material-icons-round" style="color: rgba(255,255,255,0.5);">family_restroom</span>
+            <div>
+                <strong style="display: block; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Nama Wali</strong>
+                <span><%= p.guardian_name || '-' %></span>
+            </div>
+        </div>
+        <div class="detail-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+            <span class="material-icons-round" style="color: rgba(255,255,255,0.5);">phone</span>
+            <div>
+                <strong style="display: block; font-size: 0.9rem; color: rgba(255,255,255,0.7);">WhatsApp Wali</strong>
+                <span><%= p.guardian_whatsapp || '-' %></span>
+                <% if(p.guardian_whatsapp) { %>
+                    <a href="https://wa.me/<%= p.guardian_whatsapp.replace(/\D/g, '').replace(/^0/, '62') %>" target="_blank" class="text-link" style="font-size: 0.9rem; margin-left: 10px;">Chat WA</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="section-title fade-in" style="animation-delay: 0.1s;">Kegiatan yang Diikuti</h3>
+<div class="card-list fade-in" style="animation-delay: 0.2s;">
+    <% if (groups && groups.length > 0) { %>
+        <% groups.forEach(g => { %>
+            <div class="list-card glass-card">
+                <div class="card-content">
+                    <div class="card-title">
+                        <h3><%= g.name %></h3>
+                        <span class="activity-badge"><%= g.activity_name %></span>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state">
+            <span class="material-icons-round">local_activity</span>
+            <p>Anak ini belum terdaftar di kegiatan manapun.</p>
+        </div>
+    <% } %>
+</div>
