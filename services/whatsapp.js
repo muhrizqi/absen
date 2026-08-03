@@ -18,7 +18,7 @@ async function sendWA(phone, text) {
   if (!WAHA_URL) return false;
   try {
     const headers = { 'Content-Type': 'application/json' };
-    if (WAHA_KEY) headers['Authorization'] = `Bearer ${WAHA_KEY}`;
+    if (WAHA_KEY) headers['X-Api-Key'] = WAHA_KEY;
     await axios.post(`${WAHA_URL}/api/sendText`, {
       chatId: formatPhone(phone),
       text,
@@ -106,7 +106,7 @@ async function sendTest(phone) {
   }
   try {
     const headers = { 'Content-Type': 'application/json' };
-    if (WAHA_KEY) headers['Authorization'] = `Bearer ${WAHA_KEY}`;
+    if (WAHA_KEY) headers['X-Api-Key'] = WAHA_KEY;
     const testMsg = `🧪 Ini adalah pesan *test* dari Sistem Absensi.\n\nJika Anda menerima pesan ini, konfigurasi WhatsApp sudah berjalan dengan baik.\n\nDikirim: ${formatTanggal()}, ${formatWaktu()} WIB`;
     await axios.post(`${WAHA_URL}/api/sendText`, {
       chatId: formatPhone(phone),
