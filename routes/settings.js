@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { pool } = require('../config/database');
 const { requireLogin } = require('../middleware/auth');
+const { sendTest } = require('../services/whatsapp');
 
 router.use(requireLogin);
 
@@ -80,6 +81,26 @@ router.post('/', async (req, res) => {
         console.error(e);
         req.flash('error', 'Gagal menyimpan pengaturan');
         res.redirect('/settings');
+    }
+});
+
+// Test send WhatsApp message
+router.post('/test-wa', async (req, res) => {
+    try {
+        const phone = (req.body.phone || '').trim();
+        if (!phone) {
+            return res.json({ success: false, error: 'Nomor WhatsApp wajib diisi' });
+        }
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length < 9) {
+            return res.json({ success: false, error: 'Nomor WhatsApp tidak valid' });
+        }
+
+        const result = await sendTest(phone);
+        res.json(result);
+    } catch (e) {
+        console.error(e);
+        res.json({ success: false, error: 'Terjadi kesalahan pada server' });
     }
 });
 

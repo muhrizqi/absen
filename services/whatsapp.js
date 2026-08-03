@@ -99,4 +99,26 @@ async function sendSessionEnd(userId, participant, activityName, groupName) {
   return sendWA(participant.guardian_whatsapp, msg);
 }
 
-module.exports = { sendAttendance, sendSessionEnd, getTemplate, fill, sendWA };
+// Send a test message and return detailed success/error info (for Settings > Test WA)
+async function sendTest(phone) {
+  if (!WAHA_URL) {
+    return { success: false, error: 'WAHA_API_URL belum dikonfigurasi di environment variable server.' };
+  }
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (WAHA_KEY) headers['Authorization'] = `Bearer ${WAHA_KEY}`;
+    const testMsg = `🧪 Ini adalah pesan *test* dari Sistem Absensi.\n\nJika Anda menerima pesan ini, konfigurasi WhatsApp sudah berjalan dengan baik.\n\nDikirim: ${formatTanggal()}, ${formatWaktu()} WIB`;
+    await axios.post(`${WAHA_URL}/api/sendText`, {
+      chatId: formatPhone(phone),
+      text: testMsg,
+      session: WAHA_SESSION
+    }, { headers, timeout: 15000 });
+    return { success: true };
+  } catch (e) {
+    const errMsg = e.response?.data?.message || e.response?.data?.error || e.message;
+    console.error('[WA TEST]', errMsg);
+    return { success: false, error: errMsg };
+  }
+}
+
+module.exports = { sendAttendance, sendSessionEnd, getTemplate, fill, sendWA, sendTest };
