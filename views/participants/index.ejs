@@ -6,18 +6,53 @@
     <a href="/participants/create" class="btn btn-primary ripple"><span class="material-icons-round">person_add</span> Tambah</a>
 </div>
 
-<!-- Simple search bar -->
+<%
+    // Build unique, sorted RW and RT lists for the filter dropdowns
+    const rwList = [...new Set((participants || []).map(p => p.rw).filter(v => v))].sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
+    const rtList = [...new Set((participants || []).map(p => p.rt).filter(v => v))].sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
+%>
+
+<!-- Search + Filter + Sort bar -->
 <div class="search-bar fade-in" style="margin-bottom: 1rem;">
     <div class="form-group" style="margin-bottom: 0; position: relative;">
         <span class="material-icons-round" style="position: absolute; left: 12px; top: 12px; color: rgba(255,255,255,0.5);">search</span>
         <input type="text" id="searchInput" class="form-control" placeholder="Cari nama peserta..." style="padding-left: 40px;">
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;">
+        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 100px;">
+            <select id="filterRW" class="form-control">
+                <option value="">Semua RW</option>
+                <% rwList.forEach(rw => { %>
+                    <option value="<%= rw %>">RW <%= rw %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 100px;">
+            <select id="filterRT" class="form-control">
+                <option value="">Semua RT</option>
+                <% rtList.forEach(rt => { %>
+                    <option value="<%= rt %>">RT <%= rt %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 130px;">
+            <select id="sortBy" class="form-control">
+                <option value="name">Urutkan: Nama (A-Z)</option>
+                <option value="rw">Urutkan: RW</option>
+                <option value="rt">Urutkan: RT</option>
+            </select>
+        </div>
     </div>
 </div>
 
 <div class="card-list fade-in" id="participantList">
     <% if (participants && participants.length > 0) { %>
         <% participants.forEach(p => { %>
-            <div class="list-card glass-card participant-card" data-name="<%= p.full_name.toLowerCase() %> <%= (p.nickname || '').toLowerCase() %>">
+            <div class="list-card glass-card participant-card"
+                 data-name="<%= p.full_name.toLowerCase() %> <%= (p.nickname || '').toLowerCase() %>"
+                 data-rt="<%= p.rt || '' %>"
+                 data-rw="<%= p.rw || '' %>">
                 <a href="/participants/<%= p.id %>" class="card-content" style="text-decoration: none; color: inherit; flex-grow: 1;">
                     <div class="card-title">
                         <h3><%= p.full_name %></h3>
@@ -51,18 +86,56 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
-    const cards = document.querySelectorAll('.participant-card');
+    const filterRW = document.getElementById('filterRW');
+    const filterRT = document.getElementById('filterRT');
+    const sortBy = document.getElementById('sortBy');
+    const list = document.getElementById('participantList');
+    const cards = Array.from(document.querySelectorAll('.participant-card'));
 
-    searchInput.addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase();
+    function applyFiltersAndSort() {
+        const term = searchInput.value.toLowerCase();
+        const rw = filterRW.value;
+        const rt = filterRT.value;
+
+        // Filter (show/hide)
         cards.forEach(card => {
             const name = card.getAttribute('data-name');
-            if (name.includes(term)) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
-            }
+            const cardRw = card.getAttribute('data-rw');
+            const cardRt = card.getAttribute('data-rt');
+
+            const matchesSearch = name.includes(term);
+            const matchesRW = !rw || cardRw === rw;
+            const matchesRT = !rt || cardRt === rt;
+
+            card.style.display = (matchesSearch && matchesRW && matchesRT) ? 'flex' : 'none';
         });
-    });
+
+        // Sort (reorder DOM among currently matching + all cards, natural numeric compare)
+        const collator = new Intl.Collator('id', { numeric: true, sensitivity: 'base' });
+        const sortField = sortBy.value; // 'name' | 'rw' | 'rt'
+
+        const sorted = [...cards].sort((a, b) => {
+            if (sortField === 'rw') {
+                const cmp = collator.compare(a.getAttribute('data-rw') || '', b.getAttribute('data-rw') || '');
+                return cmp !== 0 ? cmp : collator.compare(a.getAttribute('data-name'), b.getAttribute('data-name'));
+            }
+            if (sortField === 'rt') {
+                const cmp = collator.compare(a.getAttribute('data-rt') || '', b.getAttribute('data-rt') || '');
+                return cmp !== 0 ? cmp : collator.compare(a.getAttribute('data-name'), b.getAttribute('data-name'));
+            }
+            // default: name
+            return collator.compare(a.getAttribute('data-name'), b.getAttribute('data-name'));
+        });
+
+        sorted.forEach(card => list.appendChild(card));
+    }
+
+    searchInput.addEventListener('input', applyFiltersAndSort);
+    filterRW.addEventListener('change', applyFiltersAndSort);
+    filterRT.addEventListener('change', applyFiltersAndSort);
+    sortBy.addEventListener('change', applyFiltersAndSort);
+
+    // Initial sort on load (by name, matches default select value)
+    applyFiltersAndSort();
 });
 </script>
