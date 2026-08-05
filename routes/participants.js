@@ -108,12 +108,12 @@ router.post('/', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const { full_name, nickname, address, rt, rw, guardian_name, guardian_whatsapp, group_ids } = req.body;
+    const { full_name, nickname, birth_date, address, rt, rw, guardian_name, guardian_whatsapp, group_ids } = req.body;
     
     const r = await client.query(`
-      INSERT INTO participants (full_name, nickname, address, rt, rw, guardian_name, guardian_whatsapp)
-      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id
-    `, [full_name, nickname || null, address || null, rt || null, rw || null, guardian_name || null, guardian_whatsapp || null]);
+      INSERT INTO participants (full_name, nickname, birth_date, address, rt, rw, guardian_name, guardian_whatsapp)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id
+    `, [full_name, nickname || null, birth_date || null, address || null, rt || null, rw || null, guardian_name || null, guardian_whatsapp || null]);
     
     const participantId = r.rows[0].id;
     
@@ -217,13 +217,13 @@ router.post('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const { full_name, nickname, address, rt, rw, guardian_name, guardian_whatsapp, group_ids } = req.body;
+    const { full_name, nickname, birth_date, address, rt, rw, guardian_name, guardian_whatsapp, group_ids } = req.body;
     
     await client.query(`
       UPDATE participants 
-      SET full_name=$1, nickname=$2, address=$3, rt=$4, rw=$5, guardian_name=$6, guardian_whatsapp=$7, updated_at=NOW()
-      WHERE id=$8
-    `, [full_name, nickname || null, address || null, rt || null, rw || null, guardian_name || null, guardian_whatsapp || null, req.params.id]);
+      SET full_name=$1, nickname=$2, birth_date=$3, address=$4, rt=$5, rw=$6, guardian_name=$7, guardian_whatsapp=$8, updated_at=NOW()
+      WHERE id=$9
+    `, [full_name, nickname || null, birth_date || null, address || null, rt || null, rw || null, guardian_name || null, guardian_whatsapp || null, req.params.id]);
     
     // Only modify groups that the current user has access to
     const user = req.session.user;

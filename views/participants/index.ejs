@@ -63,6 +63,15 @@
                     <div class="card-meta">
                         <span><i class="material-icons-round">location_on</i> <%= p.address || '-' %> (RT <%= p.rt || '-' %>/RW <%= p.rw || '-' %>)</span>
                         <span><i class="material-icons-round">family_restroom</i> <%= p.guardian_name || '-' %></span>
+                        <% if (p.birth_date) {
+                            const bd = new Date(p.birth_date);
+                            const today = new Date();
+                            let age = today.getFullYear() - bd.getFullYear();
+                            const m = today.getMonth() - bd.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+                        %>
+                            <span><i class="material-icons-round">cake</i> <%= age %> tahun</span>
+                        <% } %>
                     </div>
                 </a>
                 <div class="card-actions">

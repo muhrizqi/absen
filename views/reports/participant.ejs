@@ -1,0 +1,78 @@
+<div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+    <div class="header-titles" style="width: 100%;">
+        <a href="/reports" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <div>
+            <h2 class="page-title"><%= participant.full_name %><%= participant.nickname ? ' (' + participant.nickname + ')' : '' %></h2>
+            <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                <% if (participant.birth_date) {
+                    const bd = new Date(participant.birth_date);
+                    const today = new Date();
+                    let age = today.getFullYear() - bd.getFullYear();
+                    const m = today.getMonth() - bd.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+                %>
+                    <%= age %> tahun &middot;
+                <% } %>
+                <% if(filters.start_date && filters.end_date) { %>
+                    <%= new Date(filters.start_date).toLocaleDateString('id-ID') %> - <%= new Date(filters.end_date).toLocaleDateString('id-ID') %>
+                <% } else { %>
+                    Semua Waktu
+                <% } %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Summary cards -->
+<div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <div class="glass-card fade-in" style="flex: 1; min-width: 120px; padding: 1rem; text-align: center;">
+        <div style="font-size: 1.6rem; font-weight: bold; color: var(--text-color);"><%= summary.totalSessions %></div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Total Sesi</div>
+    </div>
+    <div class="glass-card fade-in" style="flex: 1; min-width: 120px; padding: 1rem; text-align: center;">
+        <div style="font-size: 1.6rem; font-weight: bold; color: var(--primary-color);"><%= summary.presentCount %></div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Hadir</div>
+    </div>
+    <div class="glass-card fade-in" style="flex: 1; min-width: 120px; padding: 1rem; text-align: center;">
+        <% let pctColor = summary.percentage >= 75 ? '#10B981' : (summary.percentage >= 50 ? '#F59E0B' : '#EF4444'); %>
+        <div style="font-size: 1.6rem; font-weight: bold; color: <%= pctColor %>;"><%= summary.percentage %>%</div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Kehadiran</div>
+    </div>
+</div>
+
+<div class="glass-card fade-in" style="overflow-x: auto; padding: 0;">
+    <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: rgba(0,0,0,0.2);">
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Tanggal</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Kegiatan</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Kelompok</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (reportData && reportData.length > 0) { %>
+                <% reportData.forEach(row => { %>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem;"><%= new Date(row.session_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                        <td style="padding: 1rem;"><%= row.activity_name %></td>
+                        <td style="padding: 1rem;"><%= row.group_name %></td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <% if (row.present) { %>
+                                <span style="color: #10B981; font-weight: bold;">Hadir</span>
+                            <% } else { %>
+                                <span style="color: rgba(255,255,255,0.4);">Tidak Hadir</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
+                        Belum ada data absensi untuk peserta ini.
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>

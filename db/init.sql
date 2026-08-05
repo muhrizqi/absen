@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS participants (
   id SERIAL PRIMARY KEY,
   full_name VARCHAR(100) NOT NULL,
   nickname VARCHAR(50),
+  birth_date DATE,
   address TEXT,
   rt VARCHAR(5),
   rw VARCHAR(5),
@@ -49,6 +50,9 @@ CREATE TABLE IF NOT EXISTS participants (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Add birth_date to participants created before this column existed
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS birth_date DATE;
 
 CREATE TABLE IF NOT EXISTS group_participants (
   id SERIAL PRIMARY KEY,
@@ -62,11 +66,17 @@ CREATE TABLE IF NOT EXISTS sessions (
   id SERIAL PRIMARY KEY,
   group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
   session_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  planned_start TIME,
+  planned_end TIME,
   status VARCHAR(10) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
   notes TEXT,
   started_at TIMESTAMP DEFAULT NOW(),
   ended_at TIMESTAMP
 );
+
+-- Add planned start/end time to sessions created before these columns existed
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_start TIME;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_end TIME;
 
 CREATE TABLE IF NOT EXISTS attendances (
   id SERIAL PRIMARY KEY,

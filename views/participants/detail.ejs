@@ -19,6 +19,23 @@
 
     <div class="profile-details" style="display: grid; gap: 1rem;">
         <div class="detail-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+            <span class="material-icons-round" style="color: rgba(255,255,255,0.5);">cake</span>
+            <div>
+                <strong style="display: block; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Tanggal Lahir</strong>
+                <% if (p.birth_date) {
+                    const bd = new Date(p.birth_date);
+                    const today = new Date();
+                    let age = today.getFullYear() - bd.getFullYear();
+                    const m = today.getMonth() - bd.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+                %>
+                    <span><%= bd.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %> (<%= age %> tahun)</span>
+                <% } else { %>
+                    <span>-</span>
+                <% } %>
+            </div>
+        </div>
+        <div class="detail-item" style="display: flex; gap: 1rem; align-items: flex-start;">
             <span class="material-icons-round" style="color: rgba(255,255,255,0.5);">location_on</span>
             <div>
                 <strong style="display: block; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Alamat</strong>

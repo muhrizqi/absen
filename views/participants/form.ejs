@@ -17,6 +17,10 @@
             <label class="form-label">Nama Panggilan</label>
             <input type="text" name="nickname" class="form-control" value="<%= p ? p.nickname : '' %>">
         </div>
+        <div class="form-group">
+            <label class="form-label">Tanggal Lahir</label>
+            <input type="date" name="birth_date" class="form-control" value="<%= p && p.birth_date ? new Date(p.birth_date).toISOString().split('T')[0] : '' %>">
+        </div>
         
         <div class="form-group">
             <label class="form-label">Alamat</label>
