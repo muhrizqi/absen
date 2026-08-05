@@ -121,3 +121,105 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+<% if (user.role === 'superadmin') { %>
+<div class="form-container glass-card fade-in" style="margin-top: 1.5rem;">
+    <h3 class="section-title" style="margin-top: 0;">Backup &amp; Restore Data</h3>
+    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 10px;">
+        Backup mengunduh seluruh data aplikasi (pengguna, kegiatan, kelompok, peserta, sesi, absensi) dalam satu file JSON.
+        Simpan file ini di tempat yang aman secara berkala.
+    </p>
+
+    <a href="/settings/backup" class="btn btn-primary ripple" style="width: 100%; justify-content: center; margin-bottom: 1.5rem;">
+        <span class="material-icons-round">download</span> Download Backup
+    </a>
+
+    <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
+
+    <div class="alert alert-error glass-effect" style="margin-bottom: 1rem;">
+        <span class="material-icons-round">warning</span>
+        Restore akan <strong>menghapus seluruh data saat ini</strong> dan menggantinya dengan isi file backup. Tindakan ini tidak bisa dibatalkan.
+    </div>
+
+    <div id="restore-result"></div>
+
+    <div class="form-group">
+        <label>Pilih File Backup (.json)</label>
+        <input type="file" id="restoreFile" class="form-control" accept="application/json,.json">
+    </div>
+
+    <button type="button" id="restoreBtn" class="btn btn-primary ripple" style="width: 100%; justify-content: center; background: #EF4444;">
+        <span class="material-icons-round">restore</span> Restore Data
+    </button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const restoreBtn = document.getElementById('restoreBtn');
+    const fileInput = document.getElementById('restoreFile');
+    const resultBox = document.getElementById('restore-result');
+
+    function showRestoreResult(success, message) {
+        resultBox.innerHTML = `
+            <div class="alert ${success ? 'alert-success' : 'alert-error'} glass-effect" style="margin-bottom: 1rem;">
+                <span class="material-icons-round">${success ? 'check_circle' : 'error'}</span>
+                ${message}
+            </div>
+        `;
+    }
+
+    restoreBtn.addEventListener('click', () => {
+        const file = fileInput.files[0];
+        if (!file) {
+            showRestoreResult(false, 'Pilih file backup (.json) terlebih dahulu.');
+            return;
+        }
+
+        const confirmed = confirm(
+            'PERINGATAN: Semua data saat ini akan DIHAPUS dan diganti dengan isi file backup ini.\n\n' +
+            'Tindakan ini TIDAK BISA dibatalkan. Lanjutkan restore?'
+        );
+        if (!confirmed) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            let parsed;
+            try {
+                parsed = JSON.parse(e.target.result);
+            } catch (err) {
+                showRestoreResult(false, 'File bukan JSON yang valid.');
+                return;
+            }
+
+            const originalHtml = restoreBtn.innerHTML;
+            restoreBtn.disabled = true;
+            restoreBtn.innerHTML = '<span class="material-icons-round">hourglass_top</span> Memproses restore...';
+            resultBox.innerHTML = '';
+
+            try {
+                const res = await fetch('/settings/restore', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(parsed)
+                });
+
+                if (res.redirected) {
+                    // Server flashes success/error and redirects back to /settings
+                    window.location.href = res.url;
+                    return;
+                }
+
+                const data = await res.json().catch(() => null);
+                showRestoreResult(false, (data && data.error) || 'Gagal melakukan restore.');
+            } catch (err) {
+                showRestoreResult(false, 'Gagal menghubungi server. Coba lagi.');
+            } finally {
+                restoreBtn.disabled = false;
+                restoreBtn.innerHTML = originalHtml;
+            }
+        };
+        reader.readAsText(file);
+    });
+});
+</script>
+<% } %>
