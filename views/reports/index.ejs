@@ -5,7 +5,18 @@
     </div>
 </div>
 
-<div class="form-container glass-card fade-in">
+<!-- Tab switcher -->
+<div class="glass-card fade-in" style="display: flex; gap: 4px; padding: 6px; margin-bottom: 1.5rem; overflow-x: auto;">
+    <button type="button" class="btn report-tab-btn active" data-tab="activity" style="flex: 1; white-space: nowrap; min-width: fit-content;">Per Kegiatan</button>
+    <button type="button" class="btn report-tab-btn" data-tab="participant" style="flex: 1; white-space: nowrap; min-width: fit-content;">Per Peserta</button>
+    <button type="button" class="btn report-tab-btn" data-tab="session" style="flex: 1; white-space: nowrap; min-width: fit-content;">Per Sesi</button>
+    <button type="button" class="btn report-tab-btn" data-tab="facilitator" style="flex: 1; white-space: nowrap; min-width: fit-content;">Per Fasilitator</button>
+</div>
+
+<!-- Per Kegiatan -->
+<div class="form-container glass-card fade-in report-tab-panel" data-panel="activity">
+    <h3 class="section-title" style="margin-top: 0;">Laporan Per Kegiatan</h3>
+    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">Rekap kehadiran seluruh peserta dalam satu kegiatan, dikelompokkan per kelompok.</p>
     <form action="/reports/activity" method="GET">
         <div class="form-group">
             <label class="form-label">Pilih Kegiatan</label>
@@ -16,7 +27,6 @@
                 <% }) %>
             </select>
         </div>
-        
         <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
             <div class="form-group" style="flex: 1; margin-bottom: 0;">
                 <label class="form-label">Dari Tanggal (Opsional)</label>
@@ -27,9 +37,132 @@
                 <input type="date" name="end_date" class="form-control">
             </div>
         </div>
-
         <button type="submit" class="btn btn-primary ripple" style="width: 100%;">
             <span class="material-icons-round">analytics</span> Tampilkan Laporan
         </button>
     </form>
 </div>
+
+<!-- Per Peserta -->
+<div class="form-container glass-card fade-in report-tab-panel" data-panel="participant" style="display: none;">
+    <h3 class="section-title" style="margin-top: 0;">Laporan Per Peserta</h3>
+    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">Riwayat kehadiran satu peserta di semua kegiatan dan kelompok yang diikuti.</p>
+    <form action="/reports/participant" method="GET">
+        <div class="form-group">
+            <label class="form-label">Pilih Peserta</label>
+            <select name="participant_id" class="form-control" required>
+                <option value="">-- Pilih Peserta --</option>
+                <% participants.forEach(p => { %>
+                    <option value="<%= p.id %>"><%= p.full_name %><%= p.nickname ? ' (' + p.nickname + ')' : '' %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label">Dari Tanggal (Opsional)</label>
+                <input type="date" name="start_date" class="form-control">
+            </div>
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label">Sampai Tanggal (Opsional)</label>
+                <input type="date" name="end_date" class="form-control">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary ripple" style="width: 100%;">
+            <span class="material-icons-round">analytics</span> Tampilkan Laporan
+        </button>
+    </form>
+</div>
+
+<!-- Per Sesi -->
+<div class="form-container glass-card fade-in report-tab-panel" data-panel="session" style="display: none;">
+    <h3 class="section-title" style="margin-top: 0;">Laporan Per Sesi</h3>
+    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">Detail kehadiran lengkap satu sesi, termasuk kontak wali dan status notifikasi WA.</p>
+    <form action="/reports/session" method="GET">
+        <div class="form-group">
+            <label class="form-label">Pilih Sesi</label>
+            <select name="session_id" class="form-control" required>
+                <option value="">-- Pilih Sesi --</option>
+                <% sessionsList.forEach(s => { %>
+                    <option value="<%= s.id %>">
+                        <%= new Date(s.session_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                        - <%= s.group_name %> (<%= s.activity_name %>)
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary ripple" style="width: 100%;">
+            <span class="material-icons-round">analytics</span> Tampilkan Laporan
+        </button>
+    </form>
+</div>
+
+<!-- Per Fasilitator -->
+<div class="form-container glass-card fade-in report-tab-panel" data-panel="facilitator" style="display: none;">
+    <h3 class="section-title" style="margin-top: 0;">Laporan Per Fasilitator</h3>
+    <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">Rekap jumlah sesi yang dijalankan dan tingkat kehadiran di setiap kelompok yang diampu fasilitator.</p>
+    <form action="/reports/facilitator" method="GET">
+        <div class="form-group">
+            <label class="form-label">Pilih Fasilitator</label>
+            <select name="facilitator_id" class="form-control" required <%= (user.role === 'facilitator') ? 'disabled' : '' %>>
+                <option value="">-- Pilih Fasilitator --</option>
+                <% facilitators.forEach(f => { %>
+                    <option value="<%= f.id %>" <%= (user.role === 'facilitator' && user.id === f.id) ? 'selected' : '' %>><%= f.full_name %></option>
+                <% }) %>
+            </select>
+            <% if (user.role === 'facilitator') { %>
+                <input type="hidden" name="facilitator_id" value="<%= user.id %>">
+                <small style="color: rgba(255,255,255,0.6); margin-top: 5px; display: block;">Anda hanya bisa melihat laporan diri sendiri.</small>
+            <% } %>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label">Dari Tanggal (Opsional)</label>
+                <input type="date" name="start_date" class="form-control">
+            </div>
+            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label">Sampai Tanggal (Opsional)</label>
+                <input type="date" name="end_date" class="form-control">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary ripple" style="width: 100%;">
+            <span class="material-icons-round">analytics</span> Tampilkan Laporan
+        </button>
+    </form>
+</div>
+
+<style>
+    .report-tab-btn {
+        background: transparent;
+        color: rgba(255,255,255,0.6);
+        border: none;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .report-tab-btn.active {
+        background: var(--primary-color);
+        color: #fff;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tabBtns = document.querySelectorAll('.report-tab-btn');
+    const panels = document.querySelectorAll('.report-tab-panel');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            panels.forEach(p => {
+                p.style.display = (p.getAttribute('data-panel') === tab) ? 'block' : 'none';
+            });
+        });
+    });
+});
+</script>
