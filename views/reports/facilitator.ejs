@@ -2,17 +2,8 @@
     <div class="header-titles" style="width: 100%;">
         <a href="/reports" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
         <div>
-            <h2 class="page-title"><%= participant.full_name %><%= participant.nickname ? ' (' + participant.nickname + ')' : '' %></h2>
+            <h2 class="page-title"><%= facilitator.full_name %></h2>
             <span style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">
-                <% if (participant.birth_date) {
-                    const bd = new Date(participant.birth_date);
-                    const today = new Date();
-                    let age = today.getFullYear() - bd.getFullYear();
-                    const m = today.getMonth() - bd.getMonth();
-                    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
-                %>
-                    <%= age %> tahun &middot;
-                <% } %>
                 <% if(filters.start_date && filters.end_date) { %>
                     <%= new Date(filters.start_date).toLocaleDateString('id-ID') %> - <%= new Date(filters.end_date).toLocaleDateString('id-ID') %>
                 <% } else { %>
@@ -27,24 +18,24 @@
 <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
     <div class="glass-card fade-in" style="flex: 1; min-width: 120px; padding: 1rem; text-align: center;">
         <div style="font-size: 1.6rem; font-weight: bold; color: var(--text-color);"><%= summary.totalSessions %></div>
-        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Total Sesi</div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Sesi Dijalankan</div>
     </div>
     <div class="glass-card fade-in" style="flex: 1; min-width: 120px; padding: 1rem; text-align: center;">
-        <div style="font-size: 1.6rem; font-weight: bold; color: var(--primary-color);"><%= summary.presentCount %></div>
-        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Hadir</div>
+        <div style="font-size: 1.6rem; font-weight: bold; color: var(--primary-color);"><%= summary.totalPresent %></div>
+        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Total Hadir</div>
     </div>
     <div class="glass-card fade-in" style="flex: 1; min-width: 120px; padding: 1rem; text-align: center;">
-        <% let pctColor = summary.percentage >= 75 ? '#10B981' : (summary.percentage >= 50 ? '#F59E0B' : '#EF4444'); %>
-        <div style="font-size: 1.6rem; font-weight: bold; color: <%= pctColor %>;"><%= summary.percentage %>%</div>
+        <% let pctColor = summary.overallPercentage >= 75 ? '#10B981' : (summary.overallPercentage >= 50 ? '#F59E0B' : '#EF4444'); %>
+        <div style="font-size: 1.6rem; font-weight: bold; color: <%= pctColor %>;"><%= summary.overallPercentage %>%</div>
         <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Kehadiran</div>
     </div>
 </div>
 
 <div class="glass-card fade-in" style="padding: 1.5rem; margin-bottom: 1.5rem;">
-    <h3 class="section-title" style="margin-top: 0;">Perkembangan Kehadiran per Bulan</h3>
+    <h3 class="section-title" style="margin-top: 0;">Perkembangan per Bulan</h3>
     <% if (trend && trend.length > 0) { %>
         <div style="position: relative; height: 260px;">
-            <canvas id="participantTrendChart"></canvas>
+            <canvas id="facilitatorTrendChart"></canvas>
         </div>
     <% } else { %>
         <p style="color: rgba(255,255,255,0.5); text-align: center; padding: 1rem 0;">Belum cukup data untuk menampilkan grafik perkembangan.</p>
@@ -55,32 +46,35 @@
     <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: left;">
         <thead>
             <tr style="background: rgba(0,0,0,0.2);">
-                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Tanggal</th>
                 <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Kegiatan</th>
                 <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Kelompok</th>
-                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Status</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Total Sesi</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Hadir</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">%</th>
             </tr>
         </thead>
         <tbody>
             <% if (reportData && reportData.length > 0) { %>
-                <% reportData.forEach(row => { %>
+                <% reportData.forEach(row => { 
+                    const rows = Number(row.total_attendance_rows || 0);
+                    const present = Number(row.present_count || 0);
+                    const pct = rows > 0 ? Math.round((present / rows) * 10000) / 100 : 0;
+                    const color = pct >= 75 ? '#10B981' : (pct >= 50 ? '#F59E0B' : '#EF4444');
+                %>
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 1rem;"><%= new Date(row.session_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
                         <td style="padding: 1rem;"><%= row.activity_name %></td>
-                        <td style="padding: 1rem;"><%= row.group_name %></td>
+                        <td style="padding: 1rem;"><strong><%= row.group_name %></strong></td>
+                        <td style="padding: 1rem; text-align: center;"><%= row.total_sessions || 0 %></td>
+                        <td style="padding: 1rem; text-align: center;"><%= present %></td>
                         <td style="padding: 1rem; text-align: center;">
-                            <% if (row.present) { %>
-                                <span style="color: #10B981; font-weight: bold;">Hadir</span>
-                            <% } else { %>
-                                <span style="color: rgba(255,255,255,0.4);">Tidak Hadir</span>
-                            <% } %>
+                            <span style="color: <%= color %>; font-weight: bold;"><%= pct %>%</span>
                         </td>
                     </tr>
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="4" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
-                        Belum ada data absensi untuk peserta ini.
+                    <td colspan="5" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
+                        Fasilitator ini belum mengampu kelompok manapun.
                     </td>
                 </tr>
             <% } %>
@@ -98,41 +92,66 @@ document.addEventListener('DOMContentLoaded', () => {
         const [y, m] = t.month.split('-');
         return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
     });
+    const sessionsData = trendData.map(t => t.sessions);
     const percentages = trendData.map(t => t.percentage);
 
-    const ctx = document.getElementById('participantTrendChart').getContext('2d');
+    const ctx = document.getElementById('facilitatorTrendChart').getContext('2d');
     new Chart(ctx, {
-        type: 'line',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Kehadiran (%)',
-                data: percentages,
-                borderColor: '#10B981',
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                fill: true,
-                tension: 0.3,
-                pointBackgroundColor: '#10B981',
-                pointRadius: 4
-            }]
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Jumlah Sesi',
+                    data: sessionsData,
+                    backgroundColor: 'rgba(96, 165, 250, 0.4)',
+                    borderColor: '#60A5FA',
+                    borderWidth: 1,
+                    yAxisID: 'ySessions',
+                    order: 2
+                },
+                {
+                    type: 'line',
+                    label: 'Kehadiran (%)',
+                    data: percentages,
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    tension: 0.3,
+                    pointBackgroundColor: '#10B981',
+                    pointRadius: 4,
+                    yAxisID: 'yPercentage',
+                    order: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: { labels: { color: 'rgba(255,255,255,0.8)' } },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => `Kehadiran: ${ctx.parsed.y}%`
+                        label: (ctx) => ctx.dataset.yAxisID === 'yPercentage'
+                            ? `Kehadiran: ${ctx.parsed.y}%`
+                            : `Jumlah Sesi: ${ctx.parsed.y}`
                     }
                 }
             },
             scales: {
-                y: {
+                ySessions: {
+                    position: 'left',
+                    beginAtZero: true,
+                    ticks: { color: 'rgba(255,255,255,0.6)', stepSize: 1 },
+                    grid: { color: 'rgba(255,255,255,0.08)' },
+                    title: { display: true, text: 'Sesi', color: 'rgba(255,255,255,0.5)' }
+                },
+                yPercentage: {
+                    position: 'right',
                     min: 0,
                     max: 100,
                     ticks: { color: 'rgba(255,255,255,0.6)', callback: (v) => v + '%' },
-                    grid: { color: 'rgba(255,255,255,0.08)' }
+                    grid: { display: false },
+                    title: { display: true, text: 'Kehadiran', color: 'rgba(255,255,255,0.5)' }
                 },
                 x: {
                     ticks: { color: 'rgba(255,255,255,0.6)' },
