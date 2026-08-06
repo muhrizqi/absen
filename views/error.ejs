@@ -1,0 +1,19 @@
+<div class="page-header">
+    <div class="header-titles">
+        <a href="/dashboard" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <h2 class="page-title">Kesalahan</h2>
+    </div>
+</div>
+
+<div class="glass-card fade-in" style="padding: 2.5rem 1.5rem; text-align: center;">
+    <span class="material-icons-round" style="font-size: 3.5rem; color: #EF4444;">error_outline</span>
+    <h2 style="margin: 1rem 0 0.5rem; color: var(--text-color);">
+        <%= typeof code !== 'undefined' ? code : 500 %> — Terjadi Kesalahan
+    </h2>
+    <p style="color: rgba(255,255,255,0.6); margin-bottom: 1.5rem;">
+        <%= typeof message !== 'undefined' ? message : 'Terjadi kesalahan pada server.' %>
+    </p>
+    <a href="/dashboard" class="btn btn-primary ripple" style="display: inline-flex;">
+        <span class="material-icons-round">home</span> Kembali ke Beranda
+    </a>
+</div>
