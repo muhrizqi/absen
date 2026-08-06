@@ -1,0 +1,97 @@
+<div class="page-header" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+    <div class="header-titles" style="width: 100%;">
+        <a href="/reports" class="back-btn"><span class="material-icons-round">arrow_back</span></a>
+        <div>
+            <h2 class="page-title"><%= session.group_name %></h2>
+            <span class="activity-badge"><%= session.activity_name %></span>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card fade-in" style="padding: 1rem; margin-bottom: 1.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+        <div>
+            <strong style="display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem;">Tanggal</strong>
+            <%= new Date(session.session_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+        </div>
+        <div>
+            <strong style="display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem;">Rencana Waktu</strong>
+            <%= session.planned_start ? session.planned_start.substring(0,5) : '-' %> - <%= session.planned_end ? session.planned_end.substring(0,5) : '-' %>
+        </div>
+        <div>
+            <strong style="display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem;">Fasilitator</strong>
+            <%= session.facilitator_name || '-' %>
+        </div>
+        <div>
+            <strong style="display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem;">Status</strong>
+            <% if (session.status === 'open') { %>
+                <span style="color: var(--primary-color);">Sedang Berjalan</span>
+            <% } else { %>
+                <span style="color: rgba(255,255,255,0.5);">Selesai (<%= session.ended_at ? new Date(session.ended_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-' %>)</span>
+            <% } %>
+        </div>
+        <div>
+            <strong style="display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem;">Kehadiran</strong>
+            <%= summary.presentCount %> / <%= summary.totalCount %>
+        </div>
+    </div>
+    <% if (session.notes) { %>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <strong style="display: block; color: rgba(255,255,255,0.6); font-size: 0.8rem;">Catatan</strong>
+            <%= session.notes %>
+        </div>
+    <% } %>
+</div>
+
+<div class="glass-card fade-in" style="overflow-x: auto; padding: 0;">
+    <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: rgba(0,0,0,0.2);">
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Nama Peserta</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color);">Wali</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">Hadir</th>
+                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center;">WA</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (reportData && reportData.length > 0) { %>
+                <% reportData.forEach(row => { %>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem;">
+                            <%= row.full_name %>
+                            <% if (row.nickname) { %>
+                                <span style="color: rgba(255,255,255,0.5); font-size: 0.8rem;"> (<%= row.nickname %>)</span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem; font-size: 0.85rem;">
+                            <%= row.guardian_name || '-' %>
+                            <% if (row.guardian_whatsapp) { %>
+                                <br><span style="color: rgba(255,255,255,0.5);"><%= row.guardian_whatsapp %></span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <% if (row.present) { %>
+                                <span style="color: #10B981; font-weight: bold;">Hadir</span>
+                            <% } else { %>
+                                <span style="color: rgba(255,255,255,0.4);">Tidak</span>
+                            <% } %>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <% if (row.wa_sent) { %>
+                                <span class="material-icons-round" style="color: #10B981; font-size: 18px;" title="WA terkirim">done_all</span>
+                            <% } else { %>
+                                <span class="material-icons-round" style="color: rgba(255,255,255,0.3); font-size: 18px;" title="WA belum terkirim">schedule</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">
+                        Belum ada peserta pada sesi ini.
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
